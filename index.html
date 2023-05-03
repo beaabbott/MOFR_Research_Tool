@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Research Tool Prototype</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@200;300;400;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <style>
+    body {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 1.2rem;
+      line-height: 1.8rem;
+      font-weight: 200;
+    }
+
+    h1 {
+      color: black;
+      font-size: 1.9rem;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 400;
+    }
+
+    h2 {
+      color: black;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 300;
+      font-size: 1.6rem;
+    }
+
+    h3 {
+      color: black;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #grade-container {
+      font-size: 20px;
+      position: relative;
+      width: 100px;
+      bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- CREATE SLIDER DIV HERE -->
+
+  <div id="slider" class="shadow-sm p-3 bg-light rounded-2">
+    <div id="grade-container">
+      <div id="grade">
+        <h2>Date:</h2><span></span>
+      </div>
+    </div>
+    <input id="myRange" type="range" class="form-range" min="0" max="79" step="1" />
+  </div>
+
+  <!-- CREATE SIDE INFO BAR DIV -->
+
+  <div class="container-fluid">
+    <div class="row">
+      <div id="content" class="col-md-3 py-2 overflow-scroll">
+        <h1>MOFR TRIP RESEARCH TOOL</h1> 
+        <h2> ~  p r o t o t y p e  ~  </h2>
+
+        <p>
+          This is a research tool i'm working to build to look at better analyze a dataset related to my MA research. 
+          the lines correspond to journeys of people from Turkey to Greece in late 2015 and early 2016 who were digitally assisted by a Facebook migrant-activist organization. 
+          This organization carefully archived the departure and arrival point of each trip they helped to reach safety. <br>
+
+          <br>I have been working to make this data into a workable dataset but it still need some work. I wanted to build this tool so I can understand how and where the assisted 
+          trips unfold over time.<br>
+
+          <br> Idea is that eventually, when you click on a trip, the information about that trip will poplulate in this side bar (haven't gotten that far). I hope building this up with 
+          different functionalities that will help me to analyze the dataset. <br>
+
+          ____________________________
+        </p>
+        <h4>TRIP CODE:</h4>        
+        <h4>DATE of TRIP: </h4>  
+        <h4>DEPARTURE POINT: </h4>  
+        <h4>ARRIVAL POINT: </h4>
+        <h4>COMMENT: </h4>  
+   
+
+
+        </p>
+      </div>
+      <div class="col-md-9 p-0">
+        <div id="map">
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+  <script>
+    ///////////////////////////////////////
+    ////////// INTIALIZE LEAFLET ////////// 
+    ///////////////////////////////////////
+
+    // initialize map, centered on AEGEAN
+    const map = L.map("map", {
+      zoomSnap: 0.1,
+      zoom: 8.2,
+      center: [37.83022784422956, 28.224414925629826],
+    });
+
+    //////////////////////////////////////
+    ////////// MAP BOX STUFF ///////////// 
+    ///////////////////////////////////////
+
+    // mapbox API access Token
+    const accessToken =
+      "pk.eyJ1IjoiYmVhYWJib3R0NyIsImEiOiJjazh0NTZvaXUwZzc1M2VwYWh4Z29uMmVnIn0.ZymajKLW7YdY1IVa-ijRtg";
+
+    // request a mapbox raster tile layer and add to map
+    L.tileLayer(
+      `https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}`, {
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        id: "light-v10",
+        accessToken: accessToken,
+      }
+    ).addTo(map);
+
+
+
+    ///////////////////////////////////////
+    ///////////    CALL MAIN  ////////////
+    ///////////////////////////////////////
+
+    main()
+
+    // THIS DOESN'T WORK YET 
+    // ALSO NEED TO CUT MARITIME BORDER DATA TO BE ONLY GREECE/TURKEY AND EXPORT IT W. WEB PROJECTION 
+    // ALSO PROBABLY BAD TO HAVE TWO FETCHs.... FIGURE OUT WHERE THIS GOES
+    
+    // fetch("maritime_border.geojson")
+    //   .then(function (response) {
+    //     return response;
+    //   })
+    //   .then(function (borderData) {
+    //     console.log(borderData);
+    //     drawBorder(borderData);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(`Ruh roh! An error has occurred`, error);
+    //   }); // end fetch and promise chain
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////    FUNCTIONS TIME !      ///////////////////////
+    ////////////////////////////////////////////////////////////////////////////////
+
+
+
+    
+
+    ///////////////////////////////////////
+    //////////   MAIN FUNCTION   //////////
+    ///////////////////////////////////////
+
+    // THIS DOES MOST OF THE IMPORTANT STUFF... CALLS MOST OF THE FUNCTIONS ! 
+    //FETCHES DATA, RUNS THE REDUCE THING TO GET ME AN ARRAY W UNIQUE DATE VALUES
+    //PULLS NEWLY FORMATTED DATES FROM DATE FORMATTER FUNCTION AND PUSHED THEM TO THE GEOJSON
+
+    async function main() {
+      // THIS IS WHERE THE DATA IN FETCHED
+      const DATEOFTRIP = "DATE_of_TRIP"
+      const ITEMID = "ITEM_ID"
+      const response = await fetch("mofr_redact_4_30_lines.geojson");
+      const data = await response.json();
+      const dataFeatures = data.features
+
+      // makeArc(); // generates lines and arcs
+      // generateSliderControl() // 
+
+      const allUniqueDates = dataFeatures.reduce((storage, element) => {
+        let props = element.properties
+        let tripDate = props[DATEOFTRIP]
+        let TRIPCODE = props[ITEMID] // USE TO DEBUG
+        let tripDateObject = new Date(tripDate)
+        let formatedDate = dataFormater(tripDateObject)
+        updateDatesToGeoJson(props, formatedDate)
+
+        if (!storage.includes(formatedDate)) {
+          storage.push(formatedDate)
+        }
+        return storage
+      }, [])
+
+      const arrayOfSortedAndUniqueDates = dateSorter(allUniqueDates)
+      updateCoordinatesToHaveArcs(data) // POINT DATA CHANGED TO ADD RANDOM ARC MID POINTS
+      let map = drawArcs(data)
+      updateMap(map, arrayOfSortedAndUniqueDates)
+    }
+
+
+
+    ///////////////////////////////////////////
+    //////////      DRAW BORDER     ////////////
+    //////////////////////////////////////////
+
+
+    // TO FIGURE OUT LATER - FIX DATA FIRST 
+
+    // function drawBorder(borderData) {
+    //         //console.log(states)
+    //         const borders = L.geoJson(borderData, {
+    //             // style counties with initial default path options
+    //             style: function (feature) {
+    //                 return {
+    //                     color: "#222",
+    //                     weight: 4,
+    //                     fillOpacity: 0,
+    //                     interactive: false, // Allows you to click through the layer
+    //                 };
+    //             },
+    //             pane: 'middle'
+    //         }).addTo(map);
+
+    //     }
+
+
+    ///////////////////////////////////////////
+    //////////      UPDATE MAP     ////////////
+    //////////////////////////////////////////
+
+    // THIS IS WHERE SLIDER EVENT LISTENER LIVES
+    // CREATES INDEX VALUE FOR SLIDER (1-79)
+
+    function updateMap(leafletObject, arrayOfDates) {
+
+      let slider = document.getElementById("myRange")
+      // NEED TO REMEMBER THAT IF I ADD MORE DATES TO DATA SET THIS RANGE THING WILL PROBABLY BECOME A PROBLEM... 
+      // RIGHT NOW THE RANGE CORRESPONDS TO THE NUMBER OF UNIQUE DATES THAT I HAVE... 
+
+      slider.addEventListener("input", function (ele) {
+
+        // DON"T REALLY UNDERSTAND HOW MAKING THIS INDEX WORKS EXACTLY....
+        // I FEEL LIKE THERE MUST BE AN EASIER WAY TO DO THIS.... 
+
+        let index = ele.target.value
+        let specificInputDate = arrayOfDates[index]
+
+        let DateinSliderContrainer = document.getElementById("grade")
+        DateinSliderContrainer.innerHTML = `<h4>Date: ${specificInputDate}</h4>`
+
+        leafletObject.eachLayer(function (layer) {
+          let feature = layer.feature
+          let props = feature.properties
+          let formattedDOT = props.Formatted_Date_of_Trip
+
+          if (formattedDOT === specificInputDate) {
+            layer.setStyle({
+              color: "red",
+              weight: 4.5
+            })
+          } else {
+            layer.setStyle({
+              color: "gray",
+              weight: 0.37,
+
+            })
+          }
+
+          layer.on("mouseover", function (element) {
+
+            if (formattedDOT === specificInputDate) {
+              layer.setStyle({
+                color: "yellow",
+                weight: 6
+              })
+            } else {
+              layer.setStyle({
+                color: "red",
+                weight: 0.37,
+
+              })
+            }
+          })
+
+          layer.on("mouseout", function (element) {
+            if (formattedDOT === specificInputDate) {
+              layer.setStyle({
+                color: "red",
+                weight: 4.5
+              })
+            } else {
+              layer.setStyle({
+                color: "gray",
+                weight: 0.37,
+
+              })
+            }
+          })
+        })
+      })
+    }
+
+    ////////////////////////////////////////////////
+    //////////  ADD COORDS TO MAKE ARCS  ////////////
+    ///////////////////////////////////////////////
+
+
+    function updateCoordinatesToHaveArcs(data) {
+      // CHANGES ORIGINAL COORD DATA 
+      // MUTATES AND SAVES DATA IN PLACE 
+      data.features.forEach((feature) => {
+        const c = feature.geometry.coordinates;
+        const n = [];
+        if (c.length > 1) {
+          const iterations = 20;
+          const pts = getArcPoints(
+            c[0][1],
+            c[0][0],
+            c[1][1],
+            c[1][0],
+            iterations
+          );
+
+          feature.geometry.coordinates = pts[0];
+          feature.properties.km = pts[1];
+        }
+      })
+    }
+
+
+    ////////////////////////////////////////////////
+    /////////////////  DRAW ARCS  /////////////////
+    ///////////////////////////////////////////////
+
+    // THIS IS WHERE TOOLTIP IS  BUILT 
+
+    function drawArcs(data) {
+      const baseMap = L.geoJson(data, {
+
+        onEachFeature(feature, layer) {
+          let DOT = feature.properties.DATE_of_TRIP
+
+          layer.bindPopup(`TRIP CODE: ${feature.properties.ITEM_ID}</br>
+                            DATE of TRIP: ${feature.properties.DATE_of_TRIP}</br>
+                            Distance: ${(+feature.properties.km).toFixed(3)} km`)
+
+        },
+        style: {
+          color: "red",
+          weight: 2,
+          opacity: 0.65,
+        }
+      }).addTo(map);
+
+      return baseMap
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    ///////////////// PUSH FORMATTED DATES TO GEOJSON  /////////////////
+    ///////////////////////////////////////////////////////////////////
+
+
+    function updateDatesToGeoJson(propsObject, formatedData) {
+      // THIS ADDS TO GEOJSON (MUTATES DATA)
+      propsObject["Formatted_Date_of_Trip"] = formatedData // is a mutation
+
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////
+    ////////// BOYD, CHAT GPT et al's INCREDIBLE ARC FUNCTION  //////////// 
+    ///////////////////////////////////////////////////////////////////////
+
+    // Thank you ChatGPT for the inspiration
+    function getArcPoints(lat1, lon1, lat2, lon2, steps) {
+      const points = [];
+      const R = 6371; // Earth's radius in kilometers
+      const dLat = ((lat2 - lat1) * Math.PI) / 180;
+      const dLon = ((lon2 - lon1) * Math.PI) / 180;
+      let lat1a = (lat1 * Math.PI) / 180;
+      let lat2a = (lat2 * Math.PI) / 180;
+
+      // Haversine formula
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2) *
+        Math.cos(lat1a) *
+        Math.cos(lat2a);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+
+      const neg = Math.random() > 0.5 ? 1 : -1
+      const scale = distance < 10 ? 0.00001 : distance < 5 ? 0.0001 : 0.001
+      const dx = Math.random() * scale * neg
+      const dy = Math.abs(lon2 - lon1) < 0.1 ? dx + 0.001 * scale : dx
+
+      // Calculate intermediate points along the arc
+      for (let i = 0; i <= steps; i++) {
+        const f = i / steps;
+        const c = Math.sin(f * Math.PI) * dx * neg
+        const lat = lat1a + (lat2a - lat1a) * f + c;
+        const lon = lon1 + (lon2 - lon1) * f + c;
+        points.push([lon, (lat * 180) / Math.PI]);
+      }
+
+      return [points, distance];
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////// FANCY DATE FORMATTING THANKS TO GOOD FRIENDS OVER AT STACK OVERFLOW & OFIR  //////////// 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // who knew calendar dates were so complicated? I feel like there has to be some library that would do this for me... 
+
+    function dataFormater(dateObj) {
+      //INPUT IS DATE OBJECT
+      // OUTPUT IS STRING
+      let year = dateObj.getFullYear()
+      let month = dateObj.getMonth() + 1
+      let day = dateObj.getDate()
+      return `${year}/${month}/${day}`
+
+    }
+    // i think i have to fix the problem of needing leading zeros in the new date format i push to the geojson HERE... 
+
+    function dateFormatTOGeojsonFormat(dateString) {
+      let dateSplitArray = dateString.split("/")
+      let year = dateSplitArray[0]
+      let month = dateSplitArray[1]
+      let day = dateSplitArray[2]
+
+      return `${month}/${day}/${year}` // takes in DateObject, pumps out string
+
+    }
+
+    function dateSorter(dateColl) {
+      // create double of data to non-destructively sort it 
+      newDateCollection = dateColl.slice()
+      // sort string of dates js
+      newDateCollection.sort((a, b) => {
+        // CHANGES newDataCollection in place
+        return a > b ? 1 : a < b ? -1 : 0 // no idea how this works - found it in on the internet
+      })
+
+      return newDateCollection
+      //console.log(newDateCollection)
+    }
+
+
+
+
+    //////////////////////////////// MISC NOTES ///////////////////////////////////////
+
+    // THESE DO THE SAME THING 
+    // LONG WAY OF WRITING FUNCTION : function(){ }
+    // SHORT WRITING FUNCTION: () => {}
+
+    // NOTE TO SELF: HOW REDUCE WORKS 
+    // array.reduce(function(storage,element){
+    //   BODY
+    //},[])
+    
+  </script>
+</body>
+
+</html>
