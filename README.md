@@ -7,7 +7,5 @@ This is a research tool i'm working to build to look at better analyze a dataset
 
 I have been working to make this data into a workable dataset but it still needs some work. I wanted to build this tool so I can understand how and where the assisted trips unfold over time.
 
-Idea is that eventually, when you click on a trip, the information about that trip will poplulate in this side bar (haven't gotten that far). I hope building this up with different functionalities that will help me to analyze the dataset. 
-
-# METHODOLOGY
+The idea is that eventually, when you click on a trip, the information about that trip will poplulate in this side bar (haven't gotten that far). My hope is to build this up with different functionalities that will help me to analyze the dataset. 
 
